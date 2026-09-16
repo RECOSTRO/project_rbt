@@ -1,4 +1,3 @@
-#include <iostream>
 using namespace std;
 
 // Шаблон для кчд дерева
@@ -12,77 +11,27 @@ struct rbt{
 };
 ///////////////
 
-// функция инициализации дерева
+// шаблон для массива data
 template <typename mytypel>
-void make_tree(rbt<mytypel> *( &head), int key, mytypel data){
-    if (head != nullptr){
-        return;
-    }
-    head = new rbt<mytypel>;
+struct Node{
+    mytypel data;
+};
+///////////////
 
-    head->key = key;
-    head->data = data;
-    head->right = nullptr;
-    head->left = nullptr;
-    head->parent = nullptr;
-}
-/////////////////////
-
-
-// функция очистки дерева
 template <typename mytypel>
-void freel(rbt<mytypel> *( &head)){
-    if (head == nullptr) return;
+void make_tree(rbt<mytypel> *( &head), int key, mytypel data);
 
-    freel(head->right);
-    freel(head->left);
-
-    delete (head);
-
-    head = nullptr;
-}
-/////////////////////
-
-// функция поиска
 template <typename mytypel>
-rbt<mytypel> *search(rbt<mytypel> *head, int key){
-    if (head == nullptr) return nullptr;
+void  make_tree(Node<mytypel> *storage, rbt<mytypel> *( &head), int *key, int len);
 
-    rbt<mytypel> *temp = head;
-
-    while (temp != nullptr){
-        if (key < temp->key) temp = temp->left;
-        else if (key > temp->key) temp = temp->right;
-        else break;
-    }
-
-
-    return temp;
-}
-////////////////////
-
-// функция поиска максимуму
 template <typename mytypel>
-rbt<mytypel> *search_max(rbt<mytypel> *head){
-    if (head == nullptr) return nullptr;
+void freel(rbt<mytypel> *( &head));
 
-    rbt<mytypel> *temp = head;
-
-    while (temp->right != nullptr) temp = temp->right;
-
-    return temp;
-}
-////////////////////
-
-// функция поиска минимума
 template <typename mytypel>
-rbt<mytypel> *search_min(rbt<mytypel> *head){
-    if (head == nullptr) return nullptr;
+rbt<mytypel> *search(rbt<mytypel> *head, int key);
 
-    rbt<mytypel> *temp = head;
+template <typename mytypel>
+rbt<mytypel> *search_max(rbt<mytypel> *head);
 
-    while (temp->left != nullptr) temp = temp->left;
-
-    return temp;
-}
-////////////////////
+template <typename mytypel>
+rbt<mytypel> *search_min(rbt<mytypel> *head);
