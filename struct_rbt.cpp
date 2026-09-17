@@ -18,18 +18,20 @@ void make_tree(mytypel data, rbt<mytypel> *( &head), int key){
 }
 /////////////////////
 
+template <typename mytypel>
+void insert(rbt<mytypel> *( &head), int key, )
+
 // ещё одна функция инициализации дерева по совету коментатора
 template <typename mytypel>
 void  make_tree(Node<mytypel> *storage, rbt<mytypel> *( &head), int *key, int len){
-    if (head != nullptr) return;
-
-    head = new rbt<mytypel>;
-
-    head->key = key[0];
-    head->data = storage[0].data;
-    head->right = nullptr;
-    head->left = nullptr;
-    head->parent = nullptr;
+    if (head == nullptr){
+        head = new rbt<mytypel>;
+        head->key = key[0];
+        head->data = storage[0].data;
+        head->right = nullptr;
+        head->left = nullptr;
+        head->parent = nullptr;
+    }
 
     for (int i = 1; i < len; i++){
         insert(storage[i].data ,head, key[i]);// добавим на следующем релитзе
