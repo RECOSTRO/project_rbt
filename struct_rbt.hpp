@@ -24,15 +24,6 @@ template <typename mytypel>
 void make_tree(rbt<mytypel> *( &head), int key, mytypel data);
 
 template <typename mytypel>
-void insert(rbt<mytypel> *( &head), int key, mytypel data);
-
-template <typename mytypel>
-void  make_tree(Node<mytypel> *storage, rbt<mytypel> *( &head), int *key, int len);
-
-template <typename mytypel>
-void freel(rbt<mytypel> *( &head));
-
-template <typename mytypel>
 rbt<mytypel> *search(rbt<mytypel> *head, int key);
 
 template <typename mytypel>
@@ -40,3 +31,15 @@ rbt<mytypel> *search_max(rbt<mytypel> *head);
 
 template <typename mytypel>
 rbt<mytypel> *search_min(rbt<mytypel> *head);
+
+template <typename mytypel>
+void insert(rbt<mytypel> *( &head), int key, mytypel data);
+
+template <typename mytypel>
+void delete_node(rbt<mytypel> *(&head), int key);
+
+template <typename mytypel>
+void  make_tree(Node<mytypel> *storage, rbt<mytypel> *( &head), int *key, int len);
+
+template <typename mytypel>
+void freel(rbt<mytypel> *( &head));

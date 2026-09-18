@@ -19,27 +19,27 @@ rbt<mytypel> *search(rbt<mytypel> *head, int key){
 }
 ////////////////////
 
-// функция поиска максимуму
+// функция поиска максимуму(предшественик поиск)
 template <typename mytypel>
 rbt<mytypel> *search_max(rbt<mytypel> *head){
     if (head == nullptr) return nullptr;
 
     rbt<mytypel> *temp = head;
 
-    while (temp->right != nullptr) temp = temp->right;
+    while (temp->right != nullptr) temp = temp->right; // идём до самого правого узла в дереве
 
     return temp;
 }
 ////////////////////
 
-// функция поиска минимума
+// функция поиска минимума(поиск последователя)
 template <typename mytypel>
 rbt<mytypel> *search_min(rbt<mytypel> *head){
     if (head == nullptr) return nullptr;
 
     rbt<mytypel> *temp = head;
 
-    while (temp->left != nullptr) temp = temp->left;
+    while (temp->left != nullptr) temp = temp->left; // идём до самого левого узла в дереве
 
     return temp;
 }
@@ -60,6 +60,68 @@ void make_tree(mytypel data, rbt<mytypel> *( &head), int key){
     head->parent = nullptr;
 }
 /////////////////////
+template <typename mytypel>
+void balance_insert(rbt<mytypel> *( &New_node)){
+    if (New_node->parent->parent == nullptr) return; // родитель корень
+
+    rbt<mytypel> *father = New_node->parent;// отец
+    rbt<mytypel> *uncle = father->parent;// ищем дядю
+    rbt<metepel> *grand = New_node->parent->parent;// деда
+
+    if (grand->left = father) uncle = grand->right; // дядя справа
+    else uncle = grand->left; // дядя слева
+
+    if (uncle != nullptr){
+        if (uncle->colour = 'r'){//  случай 1(дядя красный)
+
+            father->colour = 'b';
+            uncle->colour = 'b';
+            uncle->parent->colour = 'r';
+            balance_insert(uncle->parent);
+
+        }
+    }
+
+    // случай 2 появился зиг-заг в правом и в левом поддереве
+    if (grand->left == father && father->right == New_node){
+        // поворотвокруг родителя в левом поддереве
+        New_node->parent = grand;
+        father->parent = New_node;
+        New_node->left = father;
+        grand->left = New_node;
+        father = New_node;
+        New_node = New_node->left;
+
+    } else if (grand->right == father && father->left == New_node){
+        // поворот вокруг родителя в правом поддереве
+        New_node->parent = grand;
+        father->parent = New_node;
+        New_node->right = father;
+        grand->right = New_node;
+        father = New_node;
+        New_node = New_node->right;
+
+    }
+
+    // случай 3(прямая из 3 чёрных узлов)
+    grand->colour = 'r';
+    father->colour = 'b';
+    father->parent = grand->parent;
+    grand->parent = father;
+    if (father->left == New_node){
+        grand->left = father->right;
+        father->right = grand;
+    } else {
+        grand->right = father->left;
+        father->left = grand;
+    }
+
+    if (father->parent != nullprt){
+            if (father->parent->left == grand) father->parent->left = father;
+            else father->parent->right = father;
+        }
+
+}
 
 // функция вставки узла в кчд
 template <typename mytypel>
@@ -69,9 +131,9 @@ void insert(rbt<mytypel> *( &head), int key, mytypel data){
     rbt<mytypel> *temp = head;
     rbt<mytypel> *point = temp;
 
-    while (temp != nullptr){
+    while (temp != nullptr){// проход до нужного узла
 
-        if (temp->key == key){
+        if (temp->key == key){// ключ уже существует
             cout << "Key is already use" << endl;
             return;
         }
@@ -82,7 +144,7 @@ void insert(rbt<mytypel> *( &head), int key, mytypel data){
         else temp = temp->right
     }
 
-    if (point->key > key){
+    if (point->key > key){ // вставка в левое поддерево
         rbt<mytypel> *poison = nullptr;
 
         make_tree(data, poison, key);
@@ -90,7 +152,7 @@ void insert(rbt<mytypel> *( &head), int key, mytypel data){
         poison->parent = point;
         poison->colour = 'r';
         point->left = poison;
-    } else {
+    } else { // вставка в правое поддерево
         rbt<mytypel> *poison = nullptr;
 
         make_tree(data, poison, key);
@@ -100,7 +162,7 @@ void insert(rbt<mytypel> *( &head), int key, mytypel data){
         point->right = poison;
     }
 
-    balance_insert(poison);// добавим на следующим релизе
+    balance_insert(poison);// балансировка при вставке
 }
 /////////////////////
 
