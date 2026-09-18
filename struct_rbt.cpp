@@ -12,6 +12,7 @@ void make_tree(mytypel data, rbt<mytypel> *( &head), int key){
 
     head->key = key;
     head->data = data;
+    head->colour = 'b';
     head->right = nullptr;
     head->left = nullptr;
     head->parent = nullptr;
@@ -19,7 +20,43 @@ void make_tree(mytypel data, rbt<mytypel> *( &head), int key){
 /////////////////////
 
 template <typename mytypel>
-void insert(rbt<mytypel> *( &head), int key, )
+void insert(rbt<mytypel> *( &head), int key, mytypel data){
+    rbt<mytypel> *temp = head;
+    rbt<mytypel> *point = temp;
+
+    while (temp != nullptr){
+
+        if (temp->key == key){
+            cout << "Key is already use" << endl;
+            return;
+        }
+
+        point = temp;
+
+        else if (temp->key > key) temp = temp->left;
+        else temp = temp->right
+    }
+
+    if (point->key > key){
+        rbt<mytypel> *poison = nullptr;
+
+        make_tree(data, poison, key);
+
+        poison->parent = point;
+        poison->colour = 'r';
+        point->left = poison;
+    } else {
+        rbt<mytypel> *poison = nullptr;
+
+        make_tree(data, poison, key);
+
+        poison->parent = point;
+        poison->colour = 'r';
+        point->right = poison;
+    }
+
+    balance_rbt(poison);// добавим на следующим релизе
+}
 
 // ещё одна функция инициализации дерева по совету коментатора
 template <typename mytypel>
@@ -28,13 +65,14 @@ void  make_tree(Node<mytypel> *storage, rbt<mytypel> *( &head), int *key, int le
         head = new rbt<mytypel>;
         head->key = key[0];
         head->data = storage[0].data;
+        head->colour = 'b';
         head->right = nullptr;
         head->left = nullptr;
         head->parent = nullptr;
     }
 
     for (int i = 1; i < len; i++){
-        insert(storage[i].data ,head, key[i]);// добавим на следующем релитзе
+        insert(storage[i].data ,head, key[i]);
     }
 }
 /////////////////////
