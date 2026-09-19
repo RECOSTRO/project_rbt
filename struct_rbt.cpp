@@ -60,92 +60,121 @@ void make_tree(mytypel data, rbt<mytypel> *( &head), int key){
     head->parent = nullptr;
 }
 /////////////////////
+
+// Функция левого поворота вокруг узла
 template <typename mytypel>
-void balance_insert(rbt<mytypel> *( &New_node)){
-    if (New_node->parent->parent == nullptr) return; // родитель корень
+void left_rotate(rbt<mytypel> *(&head), rbt<mytypel> *node){
+    if (node == nullptr || node->right == nullptr) return; 
 
-    rbt<mytypel> *father = New_node->parent;// отец
-    rbt<mytypel> *uncle = father->parent;// ищем дядю
-    rbt<metepel> *grand = New_node->parent->parent;// деда
+    rbt<mytypel> *y = node->right; 
 
-    if (grand->left = father) uncle = grand->right; // дядя справа
-    else uncle = grand->left; // дядя слева
+    node->right = y->left;
+    if (y->left != nullptr) y->left->parent = node;
+    
+    y->parent = node->parent;
+    if (node->parent == nullptr) head = y; 
+    else if (node == node->parent->left) node->parent->left = y;
+    else node->parent->right = y;
 
-    if (uncle != nullptr){
-        if (uncle->colour = 'r'){//  случай 1(дядя красный)
-
-            father->colour = 'b';
-            uncle->colour = 'b';
-            uncle->parent->colour = 'r';
-            balance_insert(uncle->parent);
-
-        }
-    }
-
-    // случай 2 появился зиг-заг в правом и в левом поддереве
-    if (grand->left == father && father->right == New_node){
-        // поворотвокруг родителя в левом поддереве
-        New_node->parent = grand;
-        father->parent = New_node;
-        New_node->left = father;
-        grand->left = New_node;
-        father = New_node;
-        New_node = New_node->left;
-
-    } else if (grand->right == father && father->left == New_node){
-        // поворот вокруг родителя в правом поддереве
-        New_node->parent = grand;
-        father->parent = New_node;
-        New_node->right = father;
-        grand->right = New_node;
-        father = New_node;
-        New_node = New_node->right;
-
-    }
-
-    // случай 3(прямая из 3 чёрных узлов)
-    grand->colour = 'r';
-    father->colour = 'b';
-    father->parent = grand->parent;
-    grand->parent = father;
-    if (father->left == New_node){
-        grand->left = father->right;
-        father->right = grand;
-    } else {
-        grand->right = father->left;
-        father->left = grand;
-    }
-
-    if (father->parent != nullprt){
-            if (father->parent->left == grand) father->parent->left = father;
-            else father->parent->right = father;
-        }
-
+    y->left = node;
+    node->parent = y;
 }
+/////////////////////
+
+// Функция правого поворота вокруг узла
+template <typename mytypel>
+void right_rotate(rbt<mytypel> *(&head), rbt<mytypel> *node){
+    if (node == nullptr || node->left == nullptr) return;
+
+    rbt<mytypel> *x = node->left;
+
+    node->left = x->right;
+    if (x->right != nullptr) x->right->parent = node;
+
+    x->parent = node->parent;
+    if (node->parent == nullptr) head = x;
+    else if (node == node->parent->right) node->parent->right = x;
+    else node->parent->left = x;
+
+    x->right = node;
+    node->parent = x;
+}
+/////////////////////
+
+// функция балансировки кчд при вставке
+template <typename mytypel>
+void balance_insert(rbt<mytypel> *(&head), rbt<mytypel> *New_node){
+    if (New_node->parent == nullptr) return;
+    if (New_node->parent->parent == nullptr) return; 
+    if (New_node->parent->colour == 'b') return;
+
+    rbt<mytypel> *father = New_node->parent;
+    rbt<mytypel> *grand = father->parent;
+    rbt<mytypel> *uncle = (grand->left == father) ? grand->right : grand->left;
+
+    // Случай 1: Дядя красный
+    if (uncle != nullptr && uncle->colour == 'r'){
+        father->colour = 'b';
+        uncle->colour = 'b';
+        grand->colour = 'r';
+        balance_insert(head, grand);
+        return;
+    }
+
+    // Если отец - левый потомок
+    if (grand->left == father) {
+        if (father->right == New_node){ // Случай 2: Зиг-заг сслева
+            New_node = father;
+            left_rotate(head, New_node);
+            father = New_node->parent;
+            grand = father->parent;
+        }
+        // Случай 3: прямая сслева
+        father->colour = 'b';
+        grand->colour = 'r';
+        right_rotate(head, grand);   
+    } else {
+        if (father->left == New_node){ // Случай 2 справа
+            New_node = father;
+            right_rotate(head, New_node);
+            father = New_node->parent;
+            grand = father->parent;
+        }
+        // Случай 3 прямая справа
+        father->colour = 'b';
+        grand->colour = 'r';
+        left_rotate(head, grand);
+    }
+    head->colour = 'b';
+}
+/////////////////////
 
 // функция вставки узла в кчд
 template <typename mytypel>
-void insert(rbt<mytypel> *( &head), int key, mytypel data){
-    if (head == nullptr) return;
+void insert(mytypel data, rbt<mytypel> *( &head), int key){
+    if (head == nullptr){
+        make_tree(data, head, key);
+        return;
+    }
 
     rbt<mytypel> *temp = head;
     rbt<mytypel> *point = temp;
 
     while (temp != nullptr){// проход до нужного узла
 
+        point = temp;
+
         if (temp->key == key){// ключ уже существует
             cout << "Key is already use" << endl;
             return;
         }
-
-        point = temp;
-
         else if (temp->key > key) temp = temp->left;
-        else temp = temp->right
+        else temp = temp->right;
     }
 
+    rbt<mytypel> *poison = nullptr;
+
     if (point->key > key){ // вставка в левое поддерево
-        rbt<mytypel> *poison = nullptr;
 
         make_tree(data, poison, key);
 
@@ -153,7 +182,6 @@ void insert(rbt<mytypel> *( &head), int key, mytypel data){
         poison->colour = 'r';
         point->left = poison;
     } else { // вставка в правое поддерево
-        rbt<mytypel> *poison = nullptr;
 
         make_tree(data, poison, key);
 
@@ -162,26 +190,84 @@ void insert(rbt<mytypel> *( &head), int key, mytypel data){
         point->right = poison;
     }
 
-    balance_insert(poison);// балансировка при вставке
+    balance_insert(head, poison);// балансировка при вставке
 }
 /////////////////////
 
-// ещё одна функция инициализации дерева по совету коментатора (перегрузка функции)
+// функция балансировки кчд при удалении
 template <typename mytypel>
-void  make_tree(Node<mytypel> *storage, rbt<mytypel> *( &head), int *key, int len){
-    if (head == nullptr){
-        head = new rbt<mytypel>;
-        head->key = key[0];
-        head->data = storage[0].data;
-        head->colour = 'b';
-        head->right = nullptr;
-        head->left = nullptr;
-        head->parent = nullptr;
-    }
+void balance_del(rbt<mytypel> *(&head), rbt<mytypel> *father, rbt<mytypel> *child) {
+    
+    while (child != head && (child == nullptr || child->colour == 'b')){
+        
+        if (father->left == child){// удалили узел сслева
+            rbt<mytypel> *brother = father->right;
 
-    for (int i = 1; i < len; i++){
-        insert(storage[i].data ,head, key[i]);
+            // Случай 1
+            if (brother->colour == 'r'){
+                brother->colour = 'b';
+                father->colour = 'r';
+                left_rotate(head, father);
+                brother = father->right;
+            }
+
+            // Случай 2
+            if ((brother->left == nullptr || brother->left->colour == 'b') && (brother->right == nullptr || brother->right->colour == 'b')){
+                brother->colour = 'r';
+                child = father;
+                father = child->parent;
+            } else {
+                // Случай 3
+                if (brother->right == nullptr || brother->right->colour == 'b'){
+                    if (brother->left != nullptr) brother->left->colour = 'b';
+                    brother->colour = 'r';
+                    right_rotate(head, brother);
+                    brother = father->right;
+                }
+
+                // Случай 4
+                brother->colour = father->colour;
+                father->colour = 'b';
+                if (brother->right != nullptr) brother->right->colour = 'b';
+                left_rotate(head, father);
+                child = head;
+            }
+            
+        } else { // удалили узел справа
+            rbt<mytypel> *brother = father->left;
+
+            // Случай 1
+            if (brother->colour == 'r'){
+                brother->colour = 'b';
+                father->colour = 'r';
+                right_rotate(head, father);
+                brother = father->left;
+            }
+
+            // Случай 2
+            if ((brother->right == nullptr || brother->right->colour == 'b') && (brother->left == nullptr || brother->left->colour == 'b')){
+                brother->colour = 'r';
+                child = father;
+                father = child->parent;
+            } else {
+                // Случай 3
+                if (brother->left == nullptr || brother->left->colour == 'b'){
+                    if (brother->right != nullptr) brother->right->colour = 'b';
+                    brother->colour = 'r';
+                    left_rotate(head, brother);
+                    brother = father->left;
+                }
+
+                // Случай 4
+                brother->colour = father->colour;
+                father->colour = 'b';
+                if (brother->left != nullptr) brother->left->colour = 'b';
+                right_rotate(head, father);
+                child = head; 
+            }
+        }
     }
+    if (child != nullptr) child->colour = 'b';
 }
 /////////////////////
 
@@ -200,33 +286,44 @@ void delete_node(rbt<mytypel> *(&head), int key){
 
     if (temp == nullptr) return;
 
-    if (temp == head){// условие на один узел в дереве
-        delete head;
-        return;
+    rbt<mytypel> *prut = nullptr;
+    rbt<mytypel> *child = nullptr;
+
+    if (temp->left!=nullptr && temp->right != nullptr){
+        prut = search_min(temp->right);
+        temp->key = prut->key;
+        temp->data = prut->data;
+        temp = prut;
     }
+    
+    if (temp->left != nullptr ) child = temp->left;
+    if (temp->right != nullptr) child = temp->right;
 
-    rbt<mytypel> *point = temp->parent;
+    if (child != nullptr) child->parent = temp->parent;
 
-    if (point->left == temp) {
+    if (temp->parent == nullptr) head = child;
+    else if (temp->parent->left == temp) temp->parent->left = child;
+    else temp->parent->right = child;
 
-        if (temp->right == nullptr) point->left = temp->left;
-        else if (temp->left == nullptr) point->left = temp->right;
-        else point->left = search_min(temp->right);
+    char d_colour = temp->colour;
+    prut = temp->parent;
+    delete temp;
 
-        delete temp;
+    if(d_colour == 'b') balance_del(head, prut, child);
+}
+/////////////////////
 
-        balance_del(point->left); // реализованно будет чуть позже
-    } else if (point->right) {
+// ещё одна функция инициализации дерева по совету коментатора (перегрузка функции)
+template <typename mytypel>
+void  make_tree(Node<mytypel> *storage, rbt<mytypel> *( &head), int *key, int len){
+    if (len <= 0) return;
 
-        if (temp->right == nullptr) point->right = temp->left;
-        else if (temp->left == nullptr) point->right = temp->right;
-        else point->right = search_min(temp->right);
-
-        delete temp;
-
-        balance_del(point->right); // реализованно будет чуть позже
+    for (int i = 0; i < len; i++){
+        insert(storage[i].data ,head, key[i]);
     }
 }
+/////////////////////
+
 
 // функция очистки дерева
 template <typename mytypel>
