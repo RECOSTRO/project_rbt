@@ -60,24 +60,29 @@ void make_tree(mytypel data, rbt<mytypel> *( &head), int key){
     head->parent = nullptr;
 }
 /////////////////////
+
+// функция балансировки кчд при вставке (не очень удобно реализованно из-за большего чискла указателей, но структурировано(чтобы понять логику самой балансировки))
 template <typename mytypel>
-void balance_insert(rbt<mytypel> *( &New_node)){
+void balance_insert(rbt<mytypel> *(&head), rbt<mytypel> *( &New_node)){
+    if (New_node->parent == nullptr) return;
     if (New_node->parent->parent == nullptr) return; // родитель корень
+    if(New_node->parent->colour == 'b') return;
 
     rbt<mytypel> *father = New_node->parent;// отец
-    rbt<mytypel> *uncle = father->parent;// ищем дядю
-    rbt<metepel> *grand = New_node->parent->parent;// деда
+    rbt<mytypel> *uncle = nullptr;// ищем дядю
+    rbt<mytypel> *grand = New_node->parent->parent;// деда
 
-    if (grand->left = father) uncle = grand->right; // дядя справа
+    if (grand->left == father) uncle = grand->right; // дядя справа
     else uncle = grand->left; // дядя слева
 
     if (uncle != nullptr){
-        if (uncle->colour = 'r'){//  случай 1(дядя красный)
+        if (uncle->colour == 'r'){//  случай 1(дядя красный)
 
             father->colour = 'b';
             uncle->colour = 'b';
             uncle->parent->colour = 'r';
-            balance_insert(uncle->parent);
+            balance_insert(head, uncle->parent);
+            return;
 
         }
     }
@@ -87,6 +92,8 @@ void balance_insert(rbt<mytypel> *( &New_node)){
         // поворотвокруг родителя в левом поддереве
         New_node->parent = grand;
         father->parent = New_node;
+        father->right = New_node->left;
+        if (father->right != nullptr) father->right->parent = father;
         New_node->left = father;
         grand->left = New_node;
         father = New_node;
@@ -96,6 +103,8 @@ void balance_insert(rbt<mytypel> *( &New_node)){
         // поворот вокруг родителя в правом поддереве
         New_node->parent = grand;
         father->parent = New_node;
+        father->left = New_node->right;
+        if (father->left != nullptr) father->left->parent = father;
         New_node->right = father;
         grand->right = New_node;
         father = New_node;
@@ -110,42 +119,48 @@ void balance_insert(rbt<mytypel> *( &New_node)){
     grand->parent = father;
     if (father->left == New_node){
         grand->left = father->right;
+        if (grand->left != nullptr) grand->left->parent = grand;
         father->right = grand;
     } else {
         grand->right = father->left;
+        if (grand->right != nullptr) grand->right->parent = grand;
         father->left = grand;
     }
 
-    if (father->parent != nullprt){
-            if (father->parent->left == grand) father->parent->left = father;
-            else father->parent->right = father;
-        }
-
+    if (father->parent != nullptr){
+        if (father->parent->left == grand) father->parent->left = father;
+        else father->parent->right = father;
+    } else head = father;
+    
+    head->colour = 'b';
 }
 
 // функция вставки узла в кчд
 template <typename mytypel>
-void insert(rbt<mytypel> *( &head), int key, mytypel data){
-    if (head == nullptr) return;
+void insert(mytypel data, rbt<mytypel> *( &head), int key){
+    if (head == nullptr){
+        make_tree(data, head, key);
+        return;
+    }
 
     rbt<mytypel> *temp = head;
     rbt<mytypel> *point = temp;
 
     while (temp != nullptr){// проход до нужного узла
 
+        point = temp;
+
         if (temp->key == key){// ключ уже существует
             cout << "Key is already use" << endl;
             return;
         }
-
-        point = temp;
-
         else if (temp->key > key) temp = temp->left;
-        else temp = temp->right
+        else temp = temp->right;
     }
 
+    rbt<mytypel> *poison = nullptr;
+
     if (point->key > key){ // вставка в левое поддерево
-        rbt<mytypel> *poison = nullptr;
 
         make_tree(data, poison, key);
 
@@ -153,7 +168,6 @@ void insert(rbt<mytypel> *( &head), int key, mytypel data){
         poison->colour = 'r';
         point->left = poison;
     } else { // вставка в правое поддерево
-        rbt<mytypel> *poison = nullptr;
 
         make_tree(data, poison, key);
 
@@ -162,24 +176,16 @@ void insert(rbt<mytypel> *( &head), int key, mytypel data){
         point->right = poison;
     }
 
-    balance_insert(poison);// балансировка при вставке
+    balance_insert(head, poison);// балансировка при вставке
 }
 /////////////////////
 
 // ещё одна функция инициализации дерева по совету коментатора (перегрузка функции)
 template <typename mytypel>
 void  make_tree(Node<mytypel> *storage, rbt<mytypel> *( &head), int *key, int len){
-    if (head == nullptr){
-        head = new rbt<mytypel>;
-        head->key = key[0];
-        head->data = storage[0].data;
-        head->colour = 'b';
-        head->right = nullptr;
-        head->left = nullptr;
-        head->parent = nullptr;
-    }
+    if (len <= 0) return;
 
-    for (int i = 1; i < len; i++){
+    for (int i = 0; i < len; i++){
         insert(storage[i].data ,head, key[i]);
     }
 }
@@ -200,32 +206,69 @@ void delete_node(rbt<mytypel> *(&head), int key){
 
     if (temp == nullptr) return;
 
-    if (temp == head){// условие на один узел в дереве
-        delete head;
-        return;
+    if (temp == head){
+
+        if (temp->left == nullptr && temp->right == nullptr) head == nullptr;
+
+        else if (temp->left == nullptr){
+            head = temp->right;
+            head->parent = temp->parent;
+        } else if (temp->right == nullptr){
+            head = temp->left ;
+            head->parent = temp->parent;
+        } else {
+            rbt<mytypel> *prut = search_min(head->right);
+            prut->parent->left = nullptr;
+            prut->parent = temp->parent;
+            prut->left = temp->left;
+            prut->right = temp->right;
+            prut->right->parent = prut;
+            prut->left->parent = prut;
+            head = prut;
+        }
+
+    } else {
+        if (temp->parent->left == temp){
+
+            if (temp->left == nullptr && temp->right == nullptr) temp->parent->left = nullptr;
+            else if (temp->left == nullptr){
+                temp->parent->left = temp->right;
+                temp->right->parent = temp->parent;
+            } else if (temp->right == nullptr){
+                temp->parent->left = temp->left;
+                temp->left->parent = temp->parent;
+            } else {
+                rbt<mytypel> *prut = search_min(head->right);
+                prut->parent->left = nullptr;
+                prut->parent = temp->parent;
+                prut->left = head->left;
+                prut->right = head->right;
+                prut->right->parent = prut;
+                prut->left->parent = prut;
+            }
+        } else {
+            if (temp->left == nullptr && temp->right == nullptr) temp->parent->right = nullptr;
+            else if (temp->left == nullptr){
+                temp->parent->right = temp->right;
+                temp->right->parent = temp->parent;
+            } else if (temp->right == nullptr){
+                temp->parent->right = temp->left;
+                temp->left->parent = temp->parent;
+            } else {
+                rbt<mytypel> *prut = search_min(head->right);
+                prut->parent->left = nullptr;
+                prut->parent = temp->parent;
+                prut->left = head->left;
+                prut->right = head->right;
+                prut->right->parent = prut;
+                prut->left->parent = prut;
+            }
+        }
     }
 
-    rbt<mytypel> *point = temp->parent;
+    delete temp;
 
-    if (point->left == temp) {
-
-        if (temp->right == nullptr) point->left = temp->left;
-        else if (temp->left == nullptr) point->left = temp->right;
-        else point->left = search_min(temp->right);
-
-        delete temp;
-
-        balance_del(point->left); // реализованно будет чуть позже
-    } else if (point->right) {
-
-        if (temp->right == nullptr) point->right = temp->left;
-        else if (temp->left == nullptr) point->right = temp->right;
-        else point->right = search_min(temp->right);
-
-        delete temp;
-
-        balance_del(point->right); // реализованно будет чуть позже
-    }
+    balance_del()
 }
 
 // функция очистки дерева
