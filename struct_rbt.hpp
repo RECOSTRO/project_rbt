@@ -1,9 +1,8 @@
-#include <iostream>
-using namespace std;
+#pragma once
 
 // Шаблон для кчд дерева
 template <typename mytypel>
-struct rbt{
+struct rbt {
     int key;
     mytypel data;
     char colour; // 'r' - красный, 'b' - чёрный
@@ -15,13 +14,13 @@ struct rbt{
 
 // шаблон для массива data
 template <typename mytypel>
-struct Node{
+struct Node {
     mytypel data;
 };
 ///////////////
 
 template <typename mytypel>
-void make_tree(rbt<mytypel> *( &head), int key, mytypel data);
+void make_tree(mytypel data, rbt<mytypel> *(&head), int key);
 
 template <typename mytypel>
 rbt<mytypel> *search(rbt<mytypel> *head, int key);
@@ -33,13 +32,15 @@ template <typename mytypel>
 rbt<mytypel> *search_min(rbt<mytypel> *head);
 
 template <typename mytypel>
-void insert(rbt<mytypel> *( &head), int key, mytypel data);
+void insert(mytypel data, rbt<mytypel> *(&head), int key);
 
 template <typename mytypel>
 void delete_node(rbt<mytypel> *(&head), int key);
 
 template <typename mytypel>
-void  make_tree(Node<mytypel> *storage, rbt<mytypel> *( &head), int *key, int len);
+void make_tree(Node<mytypel> *storage, rbt<mytypel> *(&head), int *key, int len);
 
 template <typename mytypel>
-void freel(rbt<mytypel> *( &head));
+void freel(rbt<mytypel> *(&head));
+
+#include "struct_rbt.cpp"

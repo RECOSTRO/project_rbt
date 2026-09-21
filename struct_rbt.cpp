@@ -1,6 +1,5 @@
-#include <struct_rbt.hpp>
-using namespace std;
-
+#include "struct_rbt.hpp"
+#include <iostream>
 
 // функция поиска
 template <typename mytypel>
@@ -165,7 +164,7 @@ void insert(mytypel data, rbt<mytypel> *( &head), int key){
         point = temp;
 
         if (temp->key == key){// ключ уже существует
-            cout << "Key is already use" << endl;
+            std::cout << "Key is already use" << std::endl;
             return;
         }
         else if (temp->key > key) temp = temp->left;
